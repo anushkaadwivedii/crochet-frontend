@@ -37,8 +37,6 @@ const imageMap = {
 export default function Cart({ cart, increaseQty, decreaseQty }) {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
-
-  // Use deployed backend URL for GitHub Pages
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://crochet-backend-gii9.onrender.com';
 
   useEffect(() => {
@@ -50,17 +48,23 @@ export default function Cart({ cart, increaseQty, decreaseQty }) {
           image: imageMap[p.name] || '',
         }));
         setProducts(withImages);
-      })
-      .catch(err => console.error('Failed to fetch products:', err));
-  }, [API_BASE_URL]);
 
+        // 🟢 Debug logs
+        console.log('🧺 CART STATE:', cart);
+        console.log('📦 PRODUCTS FROM BACKEND:', withImages);
+        console.log('🗝️ CART KEYS:', Object.keys(cart));
+      })
+      .catch(err => console.error('❌ Failed to fetch products:', err));
+  }, [API_BASE_URL, cart]);
+
+  // ✅ Fix matching logic and add debug
   const cartItems = products.filter((p) => Object.keys(cart).includes(String(p._id)));
+  console.log('🎯 FILTERED CART ITEMS:', cartItems);
 
   const total = cartItems.reduce((sum, p) => sum + p.price * (cart[p._id] || 0), 0);
 
   return (
     <div className="min-h-screen bg-pink-50 py-10 px-6 flex flex-col lg:flex-row gap-10 max-w-7xl mx-auto pt-40">
-      {/* Left: Cart Items */}
       <div className="flex-1 space-y-6">
         <h1 className="text-3xl font-bold text-rose-800 mb-4">Your Cart</h1>
 
@@ -106,7 +110,6 @@ export default function Cart({ cart, increaseQty, decreaseQty }) {
         )}
       </div>
 
-      {/* Right: Summary */}
       <div className="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow h-fit">
         <h2 className="text-xl font-bold text-rose-800 mb-4">Summary</h2>
         <div className="text-gray-700 mb-4">
