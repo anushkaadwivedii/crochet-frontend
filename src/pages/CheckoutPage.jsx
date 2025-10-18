@@ -1,5 +1,5 @@
 // src/pages/Checkout.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -8,7 +8,6 @@ import axios from 'axios';
 export default function Checkout({ cart, setCart }) {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [formInfo, setFormInfo] = useState({
     name: '',
     email: '',
@@ -16,23 +15,28 @@ export default function Checkout({ cart, setCart }) {
     notes: '',
     phone: '',
   });
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const hasCheckedCart = useRef(false);
 
-  // env variable for deployment
   const API_BASE_URL =
     import.meta.env.VITE_API_URL || "https://crochet-backend-gii9.onrender.com";
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
 
-    if (!orderSubmitted && (!cart || Object.keys(cart).length === 0)) {
-      navigate('/shop', { state: { message: 'Cart is empty! Add items to continue.' } });
+    if (!hasCheckedCart.current) {
+      hasCheckedCart.current = true;
+
+      if (!cart || Object.keys(cart).length === 0) {
+        navigate('/shop', { state: { message: 'Cart is empty! Add items to continue.' } });
+      }
     }
 
     fetch(`${API_BASE_URL}/api/products`)
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error('Failed to fetch products in checkout:', err));
-  }, [cart, navigate, API_BASE_URL, orderSubmitted]);
+  }, [API_BASE_URL, cart, navigate]);
 
   const handleChange = (e) => {
     setFormInfo({ ...formInfo, [e.target.name]: e.target.value });
@@ -48,15 +52,13 @@ export default function Checkout({ cart, setCart }) {
           quantity,
         }));
 
-        const response = await axios.post(`${API_BASE_URL}/api/orders`, {
+        await axios.post(`${API_BASE_URL}/api/orders`, {
           ...formInfo,
           items,
         });
 
-        console.log('Order placed:', response.data);
-
         setOrderSubmitted(true);
-        setCart({}); 
+        setCart({});
         navigate('/thankyou');
       } catch (err) {
         console.error('Failed to submit order:', err.message);
@@ -142,7 +144,7 @@ export default function Checkout({ cart, setCart }) {
           <h2 className="text-2xl font-semibold text-rose-800 mb-4">Order Summary</h2>
           <p>Total Items: {totalItems}</p>
           <p>
-            Total Price:{" "}
+            Total Price:{' '}
             <span className="text-rose-800 font-bold">${totalPrice.toFixed(2)}</span>
           </p>
         </div>
