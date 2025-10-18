@@ -6,7 +6,7 @@ export default function Contact() {
   
           <p className="mb-4">
             <strong>Email:</strong>{' '}
-            anushkadwivedi71@gmail.com
+            anushkaadwivedii7@gmail.com
           </p>
           <p className="mb-4">
             <strong>Phone:</strong>{' '}
