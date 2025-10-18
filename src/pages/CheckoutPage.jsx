@@ -8,6 +8,7 @@ import axios from 'axios';
 export default function Checkout({ cart, setCart }) {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [formInfo, setFormInfo] = useState({
     name: '',
     email: '',
@@ -17,20 +18,21 @@ export default function Checkout({ cart, setCart }) {
   });
 
   // env variable for deployment
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "https://crochet-backend-gii9.onrender.com";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL || "https://crochet-backend-gii9.onrender.com";
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
 
-    if (!cart || Object.keys(cart).length === 0) {
+    if (!orderSubmitted && (!cart || Object.keys(cart).length === 0)) {
       navigate('/shop', { state: { message: 'Cart is empty! Add items to continue.' } });
     }
 
     fetch(`${API_BASE_URL}/api/products`)
       .then(res => res.json())
       .then(data => setProducts(data))
-      .catch(err => console.error(' Failed to fetch products in checkout:', err));
-  }, [cart, navigate, API_BASE_URL]);
+      .catch(err => console.error('Failed to fetch products in checkout:', err));
+  }, [cart, navigate, API_BASE_URL, orderSubmitted]);
 
   const handleChange = (e) => {
     setFormInfo({ ...formInfo, [e.target.name]: e.target.value });
@@ -41,26 +43,20 @@ export default function Checkout({ cart, setCart }) {
 
     if (formInfo.name && formInfo.phone && formInfo.address) {
       try {
-        // const response = await axios.post('http://localhost:5050/api/orders', {
-        //   ...formInfo,
-        //   cart,
-        // });
-
         const items = Object.entries(cart).map(([productId, quantity]) => ({
           productId,
           quantity,
         }));
-        
+
         const response = await axios.post(`${API_BASE_URL}/api/orders`, {
           ...formInfo,
           items,
         });
-        
 
         console.log('Order placed:', response.data);
-        console.log("🧺 Clearing cart after order...");//debug
 
-        setCart({}); //clear cart after thanks
+        setOrderSubmitted(true);
+        setCart({}); 
         navigate('/thankyou');
       } catch (err) {
         console.error('Failed to submit order:', err.message);
@@ -69,18 +65,7 @@ export default function Checkout({ cart, setCart }) {
     }
   };
 
-  // const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  // const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
-  //   const product = products.find(p => String(p._id) === id);
-  //   return sum + (product?.price || 0) * qty;
-  // }, 0);
-
-  //corrected string conversion
   const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
-  //debug
-  console.log("Products:", products);
-  console.log("Cart:", cart);
 
   const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
     const product = products.find(p => p._id === id || String(p._id) === id);
@@ -88,13 +73,14 @@ export default function Checkout({ cart, setCart }) {
     return sum + price * qty;
   }, 0);
 
-
   return (
     <div className="bg-pink-50 min-h-screen py-12 px-6 pt-40">
-      <h1 className="text-4xl font-bold text-rose-800 text-center mb-10" data-aos="fade-down">Checkout</h1>
+      <h1 className="text-4xl font-bold text-rose-800 text-center mb-10" data-aos="fade-down">
+        Checkout
+      </h1>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
-
+        {/* Left side: Shipping form */}
         <div className="md:col-span-2 bg-white p-6 rounded-xl shadow-lg" data-aos="fade-right">
           <h2 className="text-2xl font-semibold text-rose-800 mb-4">Shipping Details</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -151,10 +137,14 @@ export default function Checkout({ cart, setCart }) {
           </form>
         </div>
 
+        {/* Right side: Summary */}
         <div className="bg-white p-6 rounded-xl shadow-lg" data-aos="fade-left">
           <h2 className="text-2xl font-semibold text-rose-800 mb-4">Order Summary</h2>
           <p>Total Items: {totalItems}</p>
-          <p>Total Price: <span className="text-rose-800 font-bold">${totalPrice}</span></p>
+          <p>
+            Total Price:{" "}
+            <span className="text-rose-800 font-bold">${totalPrice.toFixed(2)}</span>
+          </p>
         </div>
       </div>
     </div>
