@@ -1,3 +1,4 @@
+// src/pages/Cart.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,13 +35,11 @@ const imageMap = {
 };
 
 export default function Cart({ cart, increaseQty, decreaseQty }) {
-  console.log('🧺 Cart state:', cart);
-
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
-  // env variable for deployment
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050';
+  // Use deployed backend URL for GitHub Pages
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://crochet-backend-gii9.onrender.com';
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/products`)
@@ -52,20 +51,12 @@ export default function Cart({ cart, increaseQty, decreaseQty }) {
         }));
         setProducts(withImages);
       })
-      .catch(err => console.error('Failed to fetch products in cart:', err));
+      .catch(err => console.error('Failed to fetch products:', err));
   }, [API_BASE_URL]);
 
-  // const cartItems = products.filter((p) => cart[p._id]);
-  const cartItems = products.filter((p) => cart[String(p._id)]);
+  const cartItems = products.filter((p) => Object.keys(cart).includes(String(p._id)));
 
-  // const total = cartItems.reduce((sum, p) => sum + p.price * cart[p._id], 0);
-  const total = cartItems.reduce((sum, p) => sum + p.price * cart[String(p._id)], 0);
-
-  //DEBUGS - 
-//   console.log(' CART STATE:', cart);
-// console.log(' LOADED PRODUCTS:', products);
-// console.log(' FILTERED CART ITEMS:', cartItems);
-
+  const total = cartItems.reduce((sum, p) => sum + p.price * (cart[p._id] || 0), 0);
 
   return (
     <div className="min-h-screen bg-pink-50 py-10 px-6 flex flex-col lg:flex-row gap-10 max-w-7xl mx-auto pt-40">
@@ -87,21 +78,28 @@ export default function Cart({ cart, increaseQty, decreaseQty }) {
               <div className="flex-1">
                 <h2 className="font-semibold text-rose-800">{item.name}</h2>
                 <p className="text-sm text-gray-500">
-                  {/* ${item.price} × {cart[item._id]} */}
-                  ${item.price} × {cart[String(item._id)]}
+                  ${item.price} × {cart[item._id] || 0}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <button onClick={() => decreaseQty(item._id)} className="px-2 py-1 bg-rose-800 text-white rounded">-</button>
-                {/* <span>{cart[item._id]}</span> */}
-                <span>{cart[String(item._id)]}</span>
-                <button onClick={() => increaseQty(item._id)} className="px-2 py-1 bg-rose-800 text-white rounded">+</button>
+                <button
+                  onClick={() => decreaseQty(item._id)}
+                  className="px-2 py-1 bg-rose-800 text-white rounded"
+                >
+                  -
+                </button>
+                <span>{cart[item._id] || 0}</span>
+                <button
+                  onClick={() => increaseQty(item._id)}
+                  className="px-2 py-1 bg-rose-800 text-white rounded"
+                >
+                  +
+                </button>
               </div>
 
               <div className="text-right font-semibold text-rose-800">
-                {/* ${item.price * cart[item._id]} */}
-                ${item.price * cart[String(item._id)]}
+                ${(item.price * (cart[item._id] || 0)).toFixed(2)}
               </div>
             </div>
           ))
@@ -113,7 +111,10 @@ export default function Cart({ cart, increaseQty, decreaseQty }) {
         <h2 className="text-xl font-bold text-rose-800 mb-4">Summary</h2>
         <div className="text-gray-700 mb-4">
           <p>Total items: {Object.values(cart).reduce((a, b) => a + b, 0)}</p>
-          <p>Total price: <span className="font-semibold text-rose-800">${total}</span></p>
+          <p>
+            Total price:{' '}
+            <span className="font-semibold text-rose-800">${total.toFixed(2)}</span>
+          </p>
         </div>
         <button
           onClick={() => navigate('/checkout')}
