@@ -49,15 +49,14 @@ export default function Cart({ cart, increaseQty, decreaseQty }) {
         }));
         setProducts(withImages);
 
-        // 🟢 Debug logs
+        // debug
         console.log('🧺 CART STATE:', cart);
         console.log('📦 PRODUCTS FROM BACKEND:', withImages);
         console.log('🗝️ CART KEYS:', Object.keys(cart));
       })
-      .catch(err => console.error('❌ Failed to fetch products:', err));
+      .catch(err => console.error('Failed to fetch products:', err));
   }, [API_BASE_URL, cart]);
 
-  // ✅ Fix matching logic and add debug
   const cartItems = products.filter((p) => Object.keys(cart).includes(String(p._id)));
   console.log('🎯 FILTERED CART ITEMS:', cartItems);
 
