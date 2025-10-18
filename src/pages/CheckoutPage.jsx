@@ -75,6 +75,10 @@ export default function Checkout({ cart }) {
   //corrected string conversion
   const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
+  //debug
+  console.log("Products:", products);
+  console.log("Cart:", cart);
+
   const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
     const product = products.find(p => p._id === id || String(p._id) === id);
     const price = Number(product?.price) || 0;
