@@ -57,18 +57,10 @@ export default function Cart({ cart, increaseQty, decreaseQty }) {
       .catch(err => console.error('Failed to fetch products:', err));
   }, [API_BASE_URL, cart]);
 
-  // const cartItems = products.filter((p) => Object.keys(cart).includes(String(p._id)));
+  const cartItems = products.filter((p) => Object.keys(cart).includes(String(p._id)));
   // console.log('FILTERED CART ITEMS:', cartItems);
 
-  // const total = cartItems.reduce((sum, p) => sum + p.price * (cart[p._id] || 0), 0);
-
-
-  // converting pid properly
-  const cartItems = products.filter(p => cart[p._id] || cart[String(p._id)]);
-  const total = cartItems.reduce((sum, p) => {
-  const qty = cart[p._id] || cart[String(p._id)] || 0;
-  return sum + p.price * qty;
-}, 0);
+  const total = cartItems.reduce((sum, p) => sum + p.price * (cart[p._id] || 0), 0);
 
   return (
     <div className="min-h-screen bg-pink-50 py-10 px-6 flex flex-col lg:flex-row gap-10 max-w-7xl mx-auto pt-40">
