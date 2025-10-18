@@ -78,7 +78,9 @@ export default function App() {
           }
         />
 
-        <Route path="/checkout" element={<Checkout cart={cart} />} />
+        {/* <Route path="/checkout" element={<Checkout cart={cart} />} /> */}
+        {/* reset cart */}
+        <Route path="/checkout" element={<Checkout cart={cart} setCart={setCart} />}/>
         <Route path="/thankyou" element={<ThankYou />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/orders" element={<AdminOrders />} />

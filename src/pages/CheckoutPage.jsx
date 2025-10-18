@@ -5,7 +5,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import axios from 'axios';
 
-export default function Checkout({ cart }) {
+export default function Checkout({ cart, setCart }) {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [formInfo, setFormInfo] = useState({
@@ -58,6 +58,7 @@ export default function Checkout({ cart }) {
         
 
         console.log('Order placed:', response.data);
+        setCart({}); //clear cart after thanks
         navigate('/thankyou');
       } catch (err) {
         console.error('Failed to submit order:', err.message);
