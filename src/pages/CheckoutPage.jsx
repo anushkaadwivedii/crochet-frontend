@@ -58,6 +58,8 @@ export default function Checkout({ cart, setCart }) {
         
 
         console.log('Order placed:', response.data);
+        console.log("🧺 Clearing cart after order...");//debug
+
         setCart({}); //clear cart after thanks
         navigate('/thankyou');
       } catch (err) {
