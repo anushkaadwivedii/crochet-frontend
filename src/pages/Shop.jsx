@@ -108,6 +108,7 @@
 //   );
 // }
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import bao from '../assets/bao.JPG';
 import bearKeychain from '../assets/bear-keychain.JPG';
@@ -166,7 +167,17 @@ export default function Shop({ cart, addToCart, increaseQty, decreaseQty }) {
 
   return (
     <div className="min-h-screen bg-pink-50 py-20 px-6 max-w-7xl mx-auto pt-40">
-      <h1 className="text-4xl font-bold text-rose-800 mb-10">Shop</h1>
+      
+      {/* added the proceed to cart button for easier access on mobile phones */}
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-4xl font-bold text-rose-800">Shop</h1>
+        <Link 
+          to="/cart" 
+          className="bg-rose-800 hover:bg-rose-500 text-white font-semibold py-2 px-4 rounded-lg text-sm md:text-base"
+        >
+          Proceed to Cart
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {products.map((product) => {
