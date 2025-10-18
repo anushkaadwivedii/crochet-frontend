@@ -66,11 +66,21 @@ export default function Checkout({ cart }) {
     }
   };
 
+  // const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+  // const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
+  //   const product = products.find(p => String(p._id) === id);
+  //   return sum + (product?.price || 0) * qty;
+  // }, 0);
+
+  //corrected string conversion
   const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+
   const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
-    const product = products.find(p => String(p._id) === id);
-    return sum + (product?.price || 0) * qty;
+    const product = products.find(p => p._id === id || String(p._id) === id);
+    const price = Number(product?.price) || 0;
+    return sum + price * qty;
   }, 0);
+
 
   return (
     <div className="bg-pink-50 min-h-screen py-12 px-6 pt-40">
