@@ -17,7 +17,7 @@ export default function Checkout({ cart }) {
   });
 
   // env variable for deployment
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "https://crochet-backend-gii9.onrender.com";;
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "https://crochet-backend-gii9.onrender.com";
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
