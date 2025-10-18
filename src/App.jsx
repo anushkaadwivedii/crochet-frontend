@@ -1,4 +1,4 @@
- import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
@@ -13,7 +13,14 @@ import AdminLogin from './pages/AdminLogin';
 import AdminOrders from './pages/AdminOrders';
 
 export default function App() {
-  const [cart, setCart] = useState({});
+  const [cart, setCart] = useState(() => {
+    const saved = localStorage.getItem('cart');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
 
   const addToCart = (id) => {
     setCart((prev) => ({ ...prev, [id]: 1 }));
@@ -41,35 +48,37 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Hero />} />
 
-        <Route path="/shop" element={
-          <Shop
-            cart={cart}
-            addToCart={addToCart}
-            increaseQty={increaseQty}
-            decreaseQty={decreaseQty}
-          />
-        } />
+        <Route
+          path="/shop"
+          element={
+            <Shop
+              cart={cart}
+              addToCart={addToCart}
+              increaseQty={increaseQty}
+              decreaseQty={decreaseQty}
+            />
+          }
+        />
 
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
 
-        <Route path="/cart" element={
-          <Cart
-            cart={cart}
-            increaseQty={increaseQty}
-            decreaseQty={decreaseQty}
-          />
-        } />
+        <Route
+          path="/cart"
+          element={
+            <Cart
+              cart={cart}
+              increaseQty={increaseQty}
+              decreaseQty={decreaseQty}
+            />
+          }
+        />
 
-        <Route path="/checkout" element={
-          <Checkout cart={cart} />
-        } />
-
+        <Route path="/checkout" element={<Checkout cart={cart} />} />
         <Route path="/thankyou" element={<ThankYou />} />
 
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
-
       </Routes>
     </>
   );
