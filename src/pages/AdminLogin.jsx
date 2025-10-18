@@ -9,7 +9,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
 
   // env variable for deployment
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://crochet-backend-gii9.onrender.com';
 
   const handleLogin = async (e) => {
     e.preventDefault();
