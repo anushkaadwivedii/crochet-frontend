@@ -1,12 +1,13 @@
-// src/pages/Checkout.jsx
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/pages/CheckoutPage.jsx
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import axios from 'axios';
+// import axios from 'axios';
 
 export default function Checkout({ cart, setCart }) {
   const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
   const [formInfo, setFormInfo] = useState({
     name: '',
@@ -15,60 +16,36 @@ export default function Checkout({ cart, setCart }) {
     notes: '',
     phone: '',
   });
-  const [orderSubmitted, setOrderSubmitted] = useState(false);
-  const hasCheckedCart = useRef(false);
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_URL || "https://crochet-backend-gii9.onrender.com";
+  const location = useLocation();
+
+  // adding context for editing info before payment 
+  useEffect(() => {
+    if (location.state?.formInfo) {
+      setFormInfo(location.state.formInfo);
+    }
+  }, [location.state]);
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "https://crochet-backend-gii9.onrender.com";
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
 
-    if (!hasCheckedCart.current) {
-      hasCheckedCart.current = true;
-
-      if (!cart || Object.keys(cart).length === 0) {
-        navigate('/shop', { state: { message: 'Cart is empty! Add items to continue.' } });
-      }
+    if (!cart || Object.keys(cart).length === 0) {
+      navigate('/shop', { state: { message: 'Cart is empty! Add items to continue.' } });
     }
 
     fetch(`${API_BASE_URL}/api/products`)
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(err => console.error('Failed to fetch products in checkout:', err));
-  }, [API_BASE_URL, cart, navigate]);
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error('Failed to fetch products:', err));
+  }, [cart, navigate, API_BASE_URL]);
 
   const handleChange = (e) => {
     setFormInfo({ ...formInfo, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (formInfo.name && formInfo.phone && formInfo.address) {
-      try {
-        const items = Object.entries(cart).map(([productId, quantity]) => ({
-          productId,
-          quantity,
-        }));
-
-        await axios.post(`${API_BASE_URL}/api/orders`, {
-          ...formInfo,
-          items,
-        });
-
-        setOrderSubmitted(true);
-        setCart({});
-        navigate('/thankyou');
-      } catch (err) {
-        console.error('Failed to submit order:', err.message);
-        alert('Something went wrong while placing your order. Please try again.');
-      }
-    }
-  };
-
   const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
   const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
     const product = products.find(p => p._id === id || String(p._id) === id);
     const price = Number(product?.price) || 0;
@@ -82,10 +59,9 @@ export default function Checkout({ cart, setCart }) {
       </h1>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
-        {/* Left side: Shipping form */}
         <div className="md:col-span-2 bg-white p-6 rounded-xl shadow-lg" data-aos="fade-right">
           <h2 className="text-2xl font-semibold text-rose-800 mb-4">Shipping Details</h2>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4">
             <input
               type="text"
               name="name"
@@ -130,16 +106,18 @@ export default function Checkout({ cart, setCart }) {
               className="w-full p-3 border rounded-lg"
               rows="3"
             />
+
+            {/* proceed to paymemt */}
             <button
-              type="submit"
+              type="button"
+              onClick={() => navigate('/payment', { state: { formInfo, cart } })}
               className="mt-4 w-full bg-rose-800 hover:bg-rose-500 text-white py-3 rounded-lg"
             >
-              Place Order
+              Proceed to Payment
             </button>
           </form>
         </div>
 
-        {/* Right side: Summary */}
         <div className="bg-white p-6 rounded-xl shadow-lg" data-aos="fade-left">
           <h2 className="text-2xl font-semibold text-rose-800 mb-4">Order Summary</h2>
           <p>Total Items: {totalItems}</p>
