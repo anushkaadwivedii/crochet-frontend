@@ -15,12 +15,10 @@ import AdminOrders from './pages/AdminOrders';
 
 export default function App() {
   const [cart, setCart] = useState(() => {
-    // ✅ Load cart from localStorage when app loads
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : {};
   });
 
-  // ✅ Whenever cart changes, save it to localStorage
   const saveCart = (newCart) => {
     setCart(newCart);
     localStorage.setItem('cart', JSON.stringify(newCart));
